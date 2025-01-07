@@ -49,8 +49,8 @@ async function importCSV(filePath) {
             'cust_return_variance_account', 'vend_return_variance_account', 'tax_schedule'] }))
         .on('data', (data) => results.push(data))
         .on('end', async () => {
+            const date = new Date().toISOString();
             for (const row of results) {
-                const date = new Date().toISOString();
                 row.filename = filePath.replace('csv\\','');
                 row.date_upload = date;
                 row.uploaded_by = process.env.UPLOADED_BY;
