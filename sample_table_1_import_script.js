@@ -39,12 +39,12 @@ async function importCSV(filePath) {
             'item_bin_number1', 'preferred_per_location', 'vendor1_name', 'vendor1_subsidiary', 
             'vendor1_preferred', 'vendor1_purchase_price', 'vendor1_schedule', 'vendor1_code', 
             'vendor2_name', 'vendor2_subsidiary', 'vendor2_preferred', 
-            'vendor2_purchase_price', 'vendor2_schedule', 'vendor2_code', 'item_location_line1_location', 
+            'vendor2_purchase_price', 'vendor2_code', 'item_location_line1_location', 
             'item_location_line1_default_return_cost', 'item_location_line1_preferred_stock_level', 
             'item_location_line1_reorder_print', 'item_location_line1_lot_numbers', 
             'item_location_line1_lot_sizing_numbers', 'cost_estimate_type', 'cost_estimate', 
             'minimum_quantity', 'enforce_qty_internally', 'item_price_line1_item_price_type_ref', 
-            'item_price_line1_item_price', 'cogs_account', 'income_account', 'asset_account', 
+            'item_price_line1_item_price', 'item_price_line1_quantity_pricing', 'cogs_account', 'income_account', 'asset_account', 
             'bill_price_variance_acct', 'bill_qty_variance_acct', 'bill_exch_variance_acct', 
             'cust_return_variance_account', 'vend_return_variance_account', 'tax_schedule'] }))
         .on('data', (data) => results.push(data))
@@ -68,12 +68,12 @@ async function importCSV(filePath) {
                     item_bin_number1, preferred_per_location, vendor1_name, vendor1_subsidiary, 
                     vendor1_preferred, vendor1_purchase_price, vendor1_schedule, vendor1_code, 
                     vendor2_name, vendor2_subsidiary, vendor2_preferred, 
-                    vendor2_purchase_price, vendor2_schedule, vendor2_code, item_location_line1_location, 
+                    vendor2_purchase_price, vendor2_code, item_location_line1_location, 
                     item_location_line1_default_return_cost, item_location_line1_preferred_stock_level, 
                     item_location_line1_reorder_print, item_location_line1_lot_numbers, 
                     item_location_line1_lot_sizing_numbers, cost_estimate_type, cost_estimate, 
                     minimum_quantity, enforce_qty_internally, item_price_line1_item_price_type_ref, 
-                    item_price_line1_item_price, cogs_account, income_account, asset_account, 
+                    item_price_line1_item_price, item_price_line1_quantity_pricing, cogs_account, income_account, asset_account, 
                     bill_price_variance_acct, bill_qty_variance_acct, bill_exch_variance_acct, 
                     cust_return_variance_account, vend_return_variance_account, tax_schedule) 
                     VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81)`;
@@ -91,14 +91,14 @@ async function importCSV(filePath) {
                     row.preferred_location, row.item_bin_number1, row.preferred_per_location, row.vendor1_name, 
                     row.vendor1_subsidiary, row.vendor1_preferred, row.vendor1_purchase_price, row.vendor1_schedule, 
                     row.vendor1_code, row.vendor2_name, row.vendor2_subsidiary, row.vendor2_preferred, 
-                    row.vendor2_purchase_price, row.vendor2_schedule, row.vendor2_code, row.item_location_line1_location, 
+                    row.vendor2_purchase_price, row.vendor2_code, row.item_location_line1_location, 
                     row.item_location_line1_default_return_cost, row.item_location_line1_preferred_stock_level, 
                     row.item_location_line1_reorder_print, row.item_location_line1_lot_numbers, row.item_location_line1_lot_sizing_numbers,
                     row.cost_estimate_type, row.cost_estimate, row.minimum_quantity, row.enforce_qty_internally, 
-                    row.item_price_line1_item_price_type_ref, row.item_price_line1_item_price, row.cogs_account, 
-                    row.income_account, row.asset_account, row.bill_price_variance_acct, row.bill_qty_variance_acct, 
-                    row.bill_exch_variance_acct, row.cust_return_variance_account, row.vend_return_variance_account, 
-                    row.tax_schedule];
+                    row.item_price_line1_item_price_type_ref, row.item_price_line1_item_price, row.item_price_line1_quantity_pricing, 
+                    row.cogs_account, row.income_account, row.asset_account, row.bill_price_variance_acct, 
+                    row.bill_qty_variance_acct, row.bill_exch_variance_acct, row.cust_return_variance_account, 
+                    row.vend_return_variance_account, row.tax_schedule];
                 const resultInsert = await client.query(query, values);
                 console.log('Row inserted: ', resultInsert);
             }
