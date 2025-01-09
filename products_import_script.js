@@ -4,6 +4,7 @@ const { Client } = require('pg');
 //const csv = require('csv-parser');
 require('dotenv').config({ path: '.env' })
 
+// Constructing connection string to PostgreSql Database using environmental variables found in .env file
 const connectionString = 'postgresql://' + process.env.DB_USER + ":" + process.env.DB_USER_PASSWORD + "@" + process.env.DB_HOST + ":" + process.env.DB_PORT + "/" + process.env.DB_NAME;
 console.log('Connection string: ', connectionString);
 //console.log('Directory path: ', directoryPath);
@@ -13,15 +14,10 @@ const client = new Client({
     connectionString: connectionString,
 });
 
-// Function to insert products using an INSERT SELECT statement where ID is greater than the current count of rows in the table sample_tbl_1
-// This is to avoid inserting duplicate rows as well as mitagating the issue of inserting the same file multiple times
+// Function to insert products using an INSERT SELECT statement in the table sample_tbl_1
 async function insertProducts(callback) {
     await client.connect();
     console.log('Connection connected: ', client.host, client.database, client.port, client.user, client.password);
-    //const countQuery = `SELECT COUNT(*) FROM etc.sample_tbl_1`;
-    //const resultCount = await client.query(countQuery);
-    //const count = resultCount.rows[0].count
-    //console.log('Count: ', count);
     const insertQuery = `INSERT INTO etc.products (filename, date_upload, uploaded_by,
                     external_id, item_id, display_name, item_name, item_number_name, 
                     vendor_name_code, sales_description, sales_packaging_unit, sale_qty_per_pack_unit, 
@@ -154,6 +150,7 @@ async function insertProducts(callback) {
     callback();
 }
 
+// Insert products into the database
 insertProducts(function(){
     console.log('Products inserted');
 });
