@@ -50,10 +50,13 @@ async function importCSV(filePath) {
         .on('data', (data) => results.push(data))
         .on('end', async () => {
             const date = new Date().toISOString();
+            const uuidQuery = `SELECT gen_random_uuid()`;
+            const resultUuid = await client.query(uuidQuery);
             for (const row of results) {
                 row.filename = filePath.replace('csv\\','');
                 row.date_upload = date;
                 row.uploaded_by = process.env.UPLOADED_BY;
+                row.uuid = resultUuid.rows[0].gen_random_uuid;
                 const query = `INSERT INTO etc.sample_tbl_1(filename, date_upload, uploaded_by,
                     external_id, item_id, display_name, item_name, item_number_name, 
                     vendor_name_code, sales_description, sales_packaging_unit, sale_qty_per_pack_unit, 
@@ -75,8 +78,8 @@ async function importCSV(filePath) {
                     minimum_quantity, enforce_qty_internally, item_price_line1_item_price_type_ref, 
                     item_price_line1_item_price, item_price_line1_quantity_pricing, cogs_account, income_account, asset_account, 
                     bill_price_variance_acct, bill_qty_variance_acct, bill_exch_variance_acct, 
-                    cust_return_variance_account, vend_return_variance_account, tax_schedule) 
-                    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81)`;
+                    cust_return_variance_account, vend_return_variance_account, tax_schedule, load_id) 
+                    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82)`;
                 const values = [row.filename, row.date_upload, row.uploaded_by, row.external_id, 
                     row.item_id, row.display_name, row.item_name, row.item_number_name, row.vendor_name_code, 
                     row.sales_description, row.sales_packaging_unit, row.sale_qty_per_pack_unit, 
@@ -98,7 +101,7 @@ async function importCSV(filePath) {
                     row.item_price_line1_item_price_type_ref, row.item_price_line1_item_price, row.item_price_line1_quantity_pricing, 
                     row.cogs_account, row.income_account, row.asset_account, row.bill_price_variance_acct, 
                     row.bill_qty_variance_acct, row.bill_exch_variance_acct, row.cust_return_variance_account, 
-                    row.vend_return_variance_account, row.tax_schedule];
+                    row.vend_return_variance_account, row.tax_schedule, row.uuid];
                 const resultInsert = await client.query(query, values);
                 console.log('Row inserted: ', resultInsert);
             }
