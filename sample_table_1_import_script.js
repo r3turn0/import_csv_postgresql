@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
 const csv = require('csv-parser');
-require('dotenv').config({ path: '.env' })
+require('dotenv').config({ path: '.env' });
+const nodemailer = require('nodemailer');
 
 // Use this to import CSV files from a directory into a PostgreSQL database
 // Replace the values below with your own values
@@ -15,6 +16,26 @@ console.log('Directory path: ', directoryPath);
 const client = new Client({
     connectionString: connectionString,
 });
+
+// Create a transporter object using SMTP transport
+let transporter = nodemailer.createTransport({
+    host: process.env.SMTP_SERVER,
+    port: process.env.SMTP_SERVER_PORT,
+    secure: true, // true for port 465, false for other ports
+    service: process.env.SMTP_SERVER, // You can use other services like Yahoo, Outlook, etc.
+    auth: {
+        user: process.env.SMTP_USER, // Your email address
+        pass: process.env.SMTP_PASSWORD   // Your email password
+    }
+});
+
+let mailOptions = {
+    from: '"' + process.env.UPLOADED_BY + '" ' + process.env.SMTP_USER, // Sender address
+    to: process.env.SMTP_TO,          // List of recipients
+    // subject: 'Hello from Node.js',              // Subject line
+    // text: 'Hello world?',                       // Plain text body
+    // html: '<b>Hello world?</b>'                 // HTML body
+};
 
 // Function to import CSV files into the database
 // Replace 'etc.sample_tbl_1' with the name of the table you want to import the data into
@@ -52,11 +73,18 @@ async function importCSV(filePath) {
             const date = new Date().toISOString();
             const uuidQuery = `SELECT gen_random_uuid()`;
             const resultUuid = await client.query(uuidQuery);
+            const uuid = resultUuid.rows[0].gen_random_uuid;
+            const fileName = filePath.replace('csv\\','');
+            const uploaded_by = process.env.UPLOADED_BY;
+            const subject = 'CSV file IMPORT: ' + fileName + ' on ' + date;
+            let text = '';
+            let count = 0;
+            let html = '';
             for (const row of results) {
                 row.filename = filePath.replace('csv\\','');
                 row.date_upload = date;
                 row.uploaded_by = process.env.UPLOADED_BY;
-                row.uuid = resultUuid.rows[0].gen_random_uuid;
+                row.uuid = uuid;
                 const query = `INSERT INTO etc.sample_tbl_1(filename, date_upload, uploaded_by,
                     external_id, item_id, display_name, item_name, item_number_name, 
                     vendor_name_code, sales_description, sales_packaging_unit, sale_qty_per_pack_unit, 
@@ -104,9 +132,22 @@ async function importCSV(filePath) {
                     row.vend_return_variance_account, row.tax_schedule, row.uuid];
                 const resultInsert = await client.query(query, values);
                 console.log('Row inserted: ', resultInsert);
+                count = resultInsert.rowCount;
+                emailObj.count = count;
+                text += 'CSV file id: ' + uuid + ' filename: ' + row.filename + 'with ' + count + ' rows inserted. \n';
+                html = '<h1>CSV file IMPORT</h1><p>'+text+'</p>';
             }
             await client.end();
             console.log('CSV file successfully processed and data inserted into the database');
+            mailOptions.subject = subject;
+            mailOptions.text = text;
+            mailOptions.html = html;
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return console.log(error);
+                }
+                console.log('Message sent: %s', info.messageId);
+            });
         });
 }
 
