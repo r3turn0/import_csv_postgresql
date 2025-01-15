@@ -76,16 +76,16 @@ async function importCSV(filePath) {
             const uuid = resultUuid.rows[0].gen_random_uuid;
             const fileName = filePath.replace('csv\\','');
             const uploaded_by = process.env.UPLOADED_BY;
-            const subject = 'CSV file IMPORT: ' + fileName + ' on ' + date;
+            const subject = 'IMPORT to etc.staging: ' + fileName + ' on ' + date;
             let text = '';
             let count = 0;
             let html = '';
             for (const row of results) {
-                row.filename = filePath.replace('csv\\','');
+                row.filename = fileName;
                 row.date_upload = date;
-                row.uploaded_by = process.env.UPLOADED_BY;
+                row.uploaded_by = uploaded_by;
                 row.uuid = uuid;
-                const query = `INSERT INTO etc.sample_tbl_1(filename, date_upload, uploaded_by,
+                const query = `INSERT INTO etc.staging(filename, date_upload, uploaded_by,
                     external_id, item_id, display_name, item_name, item_number_name, 
                     vendor_name_code, sales_description, sales_packaging_unit, sale_qty_per_pack_unit, 
                     item_color, item_size, pcs_in_box, sqft_by_pcs_sheet, sqft_by_box, price_by_UOM, 
@@ -132,11 +132,10 @@ async function importCSV(filePath) {
                     row.vend_return_variance_account, row.tax_schedule, row.uuid];
                 const resultInsert = await client.query(query, values);
                 console.log('Row inserted: ', resultInsert);
-                count = resultInsert.rowCount;
-                emailObj.count = count;
-                text += 'CSV file id: ' + uuid + ' filename: ' + row.filename + 'with ' + count + ' rows inserted. \n';
-                html = '<h1>CSV file IMPORT</h1><p>'+text+'</p>';
+                count += resultInsert.rowCount;
             }
+            text += 'CSV file load_id: ' + uuid + ' filename: ' + fileName + ' with ' + count + ' rows inserted. Uploaded By ' + uploaded_by + '\n';
+            html = '<h1>CSV file IMPORT to etc.staging</h1><p>'+text+'</p>';
             await client.end();
             console.log('CSV file successfully processed and data inserted into the database');
             mailOptions.subject = subject;
@@ -146,7 +145,7 @@ async function importCSV(filePath) {
                 if (error) {
                     return console.log(error);
                 }
-                console.log('Message sent: %s', info.messageId);
+                console.log('Message sent: %s', info.response);
             });
         });
 }
