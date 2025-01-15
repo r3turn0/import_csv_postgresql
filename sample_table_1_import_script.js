@@ -80,7 +80,9 @@ async function importCSV(filePath) {
             let text = '';
             let count = 0;
             let html = '';
-            for (const row of results) {
+            try {
+
+                for (const row of results) {
                 row.filename = fileName;
                 row.date_upload = date;
                 row.uploaded_by = uploaded_by;
@@ -134,8 +136,14 @@ async function importCSV(filePath) {
                 console.log('Row inserted: ', resultInsert);
                 count += resultInsert.rowCount;
             }
-            text += 'CSV file load_id: ' + uuid + ' filename: ' + fileName + ' with ' + count + ' rows inserted. Uploaded By ' + uploaded_by + '\n';
-            html = '<h1>CSV file IMPORT to etc.staging</h1><p>'+text+'</p>';
+            text += 'CSV file load_id: ' + uuid + ' filename: ' + fileName + ' with ' + count + ' rows inserted. Uploaded By ' + uploaded_by;
+            html = '<h1>CSV file IMPORT to etc.staging</h1>' +
+                    '<p>' + text + '</p><br><br>' + 
+                    '<p>Load ID: ' + uuid + '</p>' + 
+                    '<p>File: ' + fileName + '</p>' + 
+                    '<p>Date: ' + date + '</p>' +
+                    '<p>Rows inserted: ' + count + '</p>' + 
+                    '<p>Uploaded By: ' + uploaded_by + '</p>';
             await client.end();
             console.log('CSV file successfully processed and data inserted into the database');
             mailOptions.subject = subject;
@@ -147,6 +155,20 @@ async function importCSV(filePath) {
                 }
                 console.log('Message sent: %s', info.response);
             });
+        } catch (error) {
+            console.log('Error processing CSV file: ', error);
+            text += 'Error processing CSV file: ' + error + '\n';
+            html = '<h1>CSV file IMPORT to etc.staging</h1><p>'+text+'</p>';
+            mailOptions.subject = subject;
+            mailOptions.text = text;
+            mailOptions.html = html;
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return console.log(error);
+                }
+                console.log('Message sent: %s', info.response);
+            });
+        }
         });
 }
 
